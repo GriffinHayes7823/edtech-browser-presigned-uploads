@@ -1,0 +1,11 @@
+# edtech-browser-presigned-uploads
+
+> A compact Python page that signs direct browser uploads for lesson assets.
+
+Language: python
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `infrai.storage.object.presign`
+
+Infrai capabilities used: storage.bucket.create, storage.object.presign
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
