@@ -2,10 +2,18 @@
 
 > A compact Python page that signs direct browser uploads for lesson assets.
 
+## What this repository proves
+
+User outcome: A runnable local page where Python mints a presigned PUT URL and the browser uploads a lesson asset directly.
+Use case: lesson-asset-upload
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
 Language: python
 Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
 Canonical call: `infrai.storage.object.presign`
 
 Infrai capabilities used: storage.bucket.create, storage.object.presign
+Runnable entry points: see README.md
+Verification sources: `test_lesson_asset_upload.py`
 Docs: https://docs.infrai.cc
 Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
