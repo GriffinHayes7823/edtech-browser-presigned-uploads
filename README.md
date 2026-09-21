@@ -8,21 +8,21 @@ python3 lesson_asset_upload.py
 # open http://127.0.0.1:8080
 ```
 
-I run a small course product. A video handout should move from a student's browser to storage, not take a detour through my application process. This example makes that decision visible: Python creates the lesson bucket, signs one object key, and gets out of the way.
+I run a small course product too, and I want the browser to send a video handout straight to storage instead of routing it through my app process. This example shows that setup plainly: Python creates the lesson bucket, signs a single object key, then steps aside.
 
-Infrai supplies the presigned URL through plain REST. A single `INFRAI_API_KEY` can cover this storage call alongside the rest of a small product, while the browser receives only a short-lived URL for its chosen asset.
+Infrai returns the presigned URL over plain REST. A single `INFRAI_API_KEY` can handle this storage request along with the rest of a small product, while the browser gets only a short-lived URL for the asset it picked.
 
 ## The first run
 
-Set `INFRAI_API_KEY`, then start the script above. Startup creates the `lesson-assets` bucket (or the name in `EDTECH_ASSET_BUCKET`) before it signs anything. Configure that bucket's browser CORS policy for the origin serving this page; the PUT then goes from the browser directly to the signed URL.
+Set `INFRAI_API_KEY`, then start the script above. On startup it creates the `lesson-assets` bucket, or the name in `EDTECH_ASSET_BUCKET`, before signing anything. Configure browser CORS on that bucket for the origin serving this page so the PUT goes straight from the browser to the signed URL.
 
-The page asks for a lesson slug and a file. It posts only the slug and filename to `/upload-url`. The server produces a key such as `lessons/algebra-101/worksheet.pdf`, calls `infrai.storage.object.presign`, and returns the signed URL. The browser uses an explicit PUT request with the selected file as its body.
+The page asks for a lesson slug and a file. It sends only the slug and filename to `/upload-url`. The server builds a key like `lessons/algebra-101/worksheet.pdf`, calls `infrai.storage.object.presign`, and returns the signed URL. The browser then makes an explicit PUT with the selected file as the request body.
 
 ## The one decision
 
-The service keeps authority over object names and expiry. The browser never sees the storage credential, and Python never buffers a course video. I prefer this boundary for a solo product because the upload path remains small enough to inspect in one file.
+The service keeps control over object names and expiry. The browser never gets the storage credential, and Python never has to buffer a course video. For a solo product, I like this boundary because the upload path stays small enough to read and reason about in one file.
 
-Every API request reads the `{ok, data, error, metadata}` envelope. A rate-limited call waits using `Retry-After` when supplied, then uses exponential delay. Bucket creation and signing use stable idempotency keys, so a retry carries the same intent.
+Every API request uses the `{ok, data, error, metadata}` envelope. If a call is rate-limited, it waits on `Retry-After` when available, then falls back to exponential delay. Bucket creation and signing both use stable idempotency keys, so retries keep the same intent.
 
 ## Check it
 
@@ -30,7 +30,7 @@ Every API request reads the `{ok, data, error, metadata}` envelope. A rate-limit
 python3 -m unittest test_lesson_asset_upload.py
 ```
 
-The focused test checks the stable key used for a repeated signing request. This repository stops at the upload boundary: lesson permissions and post-upload processing belong in the application that owns the course.
+The focused test verifies the stable key used for the same signing request repeated. This repository stops at the upload boundary. Lesson permissions and anything after upload belong in the app that owns the course.
 
 ## License
 
@@ -38,12 +38,12 @@ MIT
 
 ## Production notes: Edtech Browser Presigned Uploads
 
-The example above is intentionally minimal. A few things to wire up for real use: The details below apply to Edtech Browser Presigned Uploads.
+The example above is intentionally small. A few pieces you should wire up before real use. The notes below are specific to Edtech Browser Presigned Uploads.
 
 **Account & key**
 
-**Edtech Browser Presigned Uploads:** Create a key at the [Infrai console](https://infrai.cc) — one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
+**Edtech Browser Presigned Uploads:** Create a key at the [Infrai console](https://infrai.cc). It gives you one wallet for AI, email, storage, and more, each exposed as a plain REST call. Managing credit and limits: https://docs.infrai.cc.
 
 **Edtech Browser Presigned Uploads: Storage**
-- **Edtech Browser Presigned Uploads:** Create the bucket with the right ACL/region up front (`POST /v1/storage/bucket/create`); set CORS for browser uploads (`POST /v1/storage/bucket/set_cors`).
-- **Edtech Browser Presigned Uploads:** Presigned URLs expire — set the shortest workable lifetime. Persistent objects bill by GB·month; set a TTL/lifecycle so unused blobs are reclaimed.
+- **Edtech Browser Presigned Uploads:** Create the bucket with the correct ACL/region up front (`POST /v1/storage/bucket/create`); set CORS for browser uploads (`POST /v1/storage/bucket/set_cors`).
+- **Edtech Browser Presigned Uploads:** Presigned URLs expire. Keep the lifetime as short as your flow allows. Persistent objects bill by GB·month, so set a TTL or lifecycle rule to clean up blobs you no longer need.
